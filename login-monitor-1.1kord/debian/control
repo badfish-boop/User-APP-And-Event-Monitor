@@ -1,0 +1,18 @@
+Source: login-monitor
+Section: utils
+Priority: optional
+Maintainer: zhangdongwei <zhangdongwei@kylinos.cn>
+Build-Depends: debhelper (>=9),
+		cmake,libdbus-1-dev,
+		libdbus-glib-1-dev,
+		libglib2.0-dev
+Standards-Version: 3.9.6
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Browser: https://salsa.debian.org/debian/login-monitor
+#Vcs-Git: https://salsa.debian.org/debian/login-monitor.git
+
+Package: login-monitor
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <monitor user login or logout and notify >
+ <insert long description, indented with spaces>

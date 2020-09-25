@@ -1,0 +1,13 @@
+[Unit]
+Description= login-monitor server
+ConditionFileIsExecutable=/usr/bin/login_monitor
+After=network.target
+
+[Service]
+Type=dbus
+BusName=com.kylin.intel.edu.uregis
+ExecStart=/usr/bin/login_monitor
+
+[Install]
+WantedBy=multi-user.target
+

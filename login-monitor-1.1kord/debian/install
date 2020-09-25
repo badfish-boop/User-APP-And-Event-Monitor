@@ -1,0 +1,3 @@
+login_monitor /usr/bin
+login-monitor.service /lib/systemd/system/
+/etc/dbus-1/system.d/com.kylin.intel.edu.uregis.conf /etc/dbus-1/system.d/
