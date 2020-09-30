@@ -30,6 +30,10 @@ void dbus_userlogin_singal_send(uid_t ruid);
 
 void dbus_userlogout_singal_send(uid_t ruid);
 
+void dbus_pkgadd_singal_send(char* pkgname);
+
+void dbus_pkgremove_singal_send(char* pkgname);
+
 void dbus_systime_change_singal_send(char *front_time,char *current_time);
 
 int dbus_list_users_method_call(struct dbus_list_users list_user[]);

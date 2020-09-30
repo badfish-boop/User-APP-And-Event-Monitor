@@ -1,0 +1,3 @@
+/home/kylin/zdw/git_repo/myrepo/login-monitor/login-monitor-1.1kord/CMakeFiles/edit_cache.dir
+/home/kylin/zdw/git_repo/myrepo/login-monitor/login-monitor-1.1kord/CMakeFiles/rebuild_cache.dir
+/home/kylin/zdw/git_repo/myrepo/login-monitor/login-monitor-1.1kord/CMakeFiles/login_monitor.dir

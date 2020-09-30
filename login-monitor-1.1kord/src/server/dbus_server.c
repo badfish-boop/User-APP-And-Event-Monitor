@@ -39,10 +39,10 @@ const char *server_introspection_xml =
 	"      <arg name='uid' type='u' direction='out' />\n"
 	"    </method>\n"
     "    <signal name='PkgAdd'>\n"
-    "        <arg name='pkgname' type='s' direction='out' />\n"
+    "        <arg name='appid' type='s' direction='out' />\n"
 	"    </signal>"
     "    <signal name='PKgRemove'>\n"
-    "       <arg name='pkgname' type='s' direction='out' />\n"
+    "       <arg name='appid' type='s' direction='out' />\n"
 	"    </signal>"
 	"    <signal name='UserLogin'>\n"
     "       <arg name='uid' type='u' direction='out' />\n"
@@ -153,15 +153,15 @@ int dbus_list_users_method_call(struct dbus_list_users list_user[])
 				while (dbus_message_iter_get_arg_type(&subargs)
 						!= DBUS_TYPE_INVALID) 
 				{
-                    printf("i1=%d\n",users_num);
+                    
 					if(DBUS_TYPE_STRUCT == dbus_message_iter_get_arg_type(&subargs)) 
 					{
-                        printf("i2=%d\n",users_num);
+                    
                         dbus_message_iter_recurse(&subargs, &ssubargs);
                         while (dbus_message_iter_get_arg_type(&ssubargs)
                                 != DBUS_TYPE_INVALID) 
                         {
-                            printf("i3=%d\n",users_num);
+                            
                             switch (dbus_message_iter_get_arg_type(&ssubargs)) 
                             {
                                 char *s;

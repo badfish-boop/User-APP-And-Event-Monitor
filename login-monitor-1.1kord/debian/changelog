@@ -1,3 +1,9 @@
+login-monitor (1.1kord-11) v101; urgency=medium
+  
+   *统一应用安装卸载信号参数名称为appid
+ 
+ -- zhangdongwei <zhangdongwei@kylinos.cn>  Wed, 30 Sep 2020 11:28:45 +0800
+
 login-monitor (1.1kord-10) v101; urgency=medium
 
    *增加系统时间修改事件信号

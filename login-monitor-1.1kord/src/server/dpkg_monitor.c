@@ -8,20 +8,20 @@
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <libgen.h>
+
+#include "dbus_server.h"
 
 #define BUF_LEN (10 * (sizeof(struct inotify_event) + NAME_MAX + 1))
 
 struct tm *localtime( const time_t *time );
-/*
+
 char *result[200];
 char *name[200];
 char *version[200];
 char *newversion[200];
-*/
-char **result;
-char **name;
-char **version[200];
-char **newversion[200];
+char informdesktop[200][1000];
 
 //分离字符串，通过空格" "
 char *split_line_result(char *result)
@@ -225,19 +225,28 @@ int getResult_test()
 	size_t len = 0;
 	ssize_t read;
 
-    result = (char **)malloc(200*sizeof(char *));
-    name = (char **)malloc(200*sizeof(char *));
-
     int i = 0;
     printf("getline:\n");  
 	while ((read = getline(&line, &len, fp)) != -1)
 	{
-//        printf("line [%d] = %s\n",i ,line); 
+//        printf("line [%d] = %s\n",i ,line);
+		memset(informdesktop[i],0,1024); 
         char str[200];
         char str1[200];
         char str2[200];
         char str3[200];
         if(strstr(line,"install ") != NULL){
+			char  sysctlfortest[200],sysctlwr[200];
+			char  begin[1024] = {0};
+			char  out[1024] = {0};
+			char  ch[1024] = {0};
+			char  pass[1024]={0};
+			char  passdesktop[1024]={0};
+			memset(passdesktop,0,1024);
+			memset(begin,0,1024);	
+			memset(out,0,1024);
+			memset(ch,0,1024);
+			memset(pass,0,1024);
             strcpy(str,line);
             strcpy(str1,line);
             strcpy(str2,line);
@@ -253,11 +262,51 @@ int getResult_test()
             printf("line[%d]=%s\n", i, result[i]);
             printf("line-1[%d]=%s\n", i, name[i]);
             printf("line-2[%d]=%s\n", i, version[i]);
-            printf("line-3[%d]=%s\n", i, newversion[i]);
-            i++;
-            dbus_pkgadd_singal_send(*name);
+            printf("line-3[%d]=%s", i, newversion[i]);
+			sprintf(sysctlfortest,"dpkg -L %s | grep \\.desktop$ >>/dev/null",name[i]);  
+			sprintf(sysctlwr,"dpkg -L %s | grep \\.desktop$  ",name[i]); 
+			FILE *fp = popen(sysctlwr,"r");
+			if(fp == NULL )
+			{
+				perror("popen");
+				return 1;					
+			}			
+			while(fgets(begin,sizeof(begin),fp))
+			{
+				if(strstr(begin,"desktop"))
+				{
+					char * base = basename(begin);
+					memcpy(out,base,strlen(base)-9);
+					strcat(ch,out);
+					strcat(ch,";");
+				}
+				memset(begin,0,1024);
+				memset(out,0,1024);
+			}
+			pclose(fp);
+			if(system(sysctlfortest)==0)
+			{
+				strcat(passdesktop,name[i]);
+				strcat(passdesktop,"=");
+			}
+			strcat(passdesktop,ch);
+			strcpy(informdesktop[i],passdesktop);
+			printf("line-4[%d]=%s\n\n", i, informdesktop[i]);
+            dbus_pkgadd_singal_send(*informdesktop);
+			strcpy(pass,informdesktop[i]);
+			strcat(pass,"\n");
+			int fd = open("/etc/desktop_query.txt",O_RDWR|O_CREAT|O_APPEND,0666);
+			if(fd<0)
+			{perror("open");}
+			if(system(sysctlfortest)==0)
+			write(fd,pass,strlen(pass));
+			close(fd);
+			i++; 
             printf("getResult-install-OK\n");
         }else if(strstr(line,"remove ") != NULL){
+            			char  systemctl[200],sysctlwr[200];
+			char  inter[200]={0};
+			memset(inter,0,200);
             strcpy(str,line);
             strcpy(str1,line);
             strcpy(str2,line);
@@ -273,11 +322,40 @@ int getResult_test()
             printf("line[%d]=%s\n", i, result[i]);
             printf("line-1[%d]=%s\n", i, name[i]);
             printf("line-2[%d]=%s\n", i, version[i]);
-            printf("line-3[%d]=%s\n", i, newversion[i]);
-            i++;
-            dbus_pkgremove_singal_send(*name);
+            printf("line-3[%d]=%s", i, newversion[i]);
+			strcpy(inter,name[i]);
+			strcat(inter,"=");
+			sprintf(systemctl,"sed -i '/%s/d' '/etc/desktop_query.txt'",name[i]);
+			sprintf(sysctlwr,"cat /etc/desktop_query.txt | grep %s | tr '\n' ' ' ",inter);
+			FILE *fp = popen(sysctlwr,"r");
+			if(fp == NULL )
+			{
+				perror("popen");
+				return 2;					
+			}
+			fgets(informdesktop[i],sizeof(informdesktop[i]),fp);
+			printf("line-4[%d]=%s\n\n", i, informdesktop[i]);
+            dbus_pkgremove_singal_send(*informdesktop);
+			pclose(fp);
+	
+			system(systemctl);
+			i++; 
             printf("getResult-remove-OK\n");
         }else if(strstr(line,"upgrade ") != NULL){
+            char  systemctlrm[200],sysctlwrrm[200];
+			char  sysctlfortest[200],sysctlwrin[200];
+			char  begin[1024]={0};
+			char  out[1024]={0};
+			char  ch[1024]={0};
+			char  pass[1024]={0};
+			char  inter[200]={0};
+			char  passdesktop[1024]={0};
+			memset(passdesktop,0,1024);
+			memset(inter,0,200);
+			memset(pass,0,1024);
+			memset(begin,0,1024);	
+			memset(out,0,1024);
+			memset(ch,0,1024);
             strcpy(str,line);
             strcpy(str1,line);
             strcpy(str2,line);
@@ -293,8 +371,64 @@ int getResult_test()
             printf("line[%d]=%s\n", i, result[i]);
             printf("line-1[%d]=%s\n", i, name[i]);
             printf("line-2[%d]=%s\n", i, version[i]);
-            printf("line-3[%d]=%s\n", i, newversion[i]);
-            i++;
+            printf("line-3[%d]=%s", i, newversion[i]);
+			strcpy(inter,name[i]);
+			strcat(inter,"=");
+			sprintf(systemctlrm,"sed -i '/%s/d' /etc/desktop_query.txt",name[i]);
+			sprintf(sysctlwrrm,"cat /etc/desktop_query.txt | grep %s | tr '\n' ' ' ",inter);//cat
+			FILE *fprm = popen(sysctlwrrm,"r");
+			if(fprm == NULL )
+			{
+				perror("popen");
+				return 3;					
+			}
+			fgets(informdesktop[i],sizeof(informdesktop[i]),fprm);
+			printf("line-4[%d]=%s\n", i, informdesktop[i]);
+            dbus_pkgremove_singal_send(*informdesktop);
+			pclose(fprm);
+			system(systemctlrm);
+
+			memset(informdesktop[i],0,1024);
+
+			sprintf(sysctlfortest,"dpkg -L %s | grep \\.desktop$ >>/dev/null",name[i]);  
+			sprintf(sysctlwrin,"dpkg -L %s | grep \\.desktop$  ",name[i]); 
+			FILE *fpin = popen(sysctlwrin,"r");
+			if(fpin == NULL )
+			{
+				perror("popen");
+				return 4;					
+			}
+			while(fgets(begin,sizeof(begin),fpin))
+			{
+				if(strstr(begin,"desktop"))
+				{
+					char * base = basename(begin);
+					memcpy(out,base,strlen(base)-9);
+					strcat(ch,out);
+					strcat(ch,";");
+				}
+				memset(begin,0,1024);
+				memset(out,0,1024);
+			}
+			pclose(fpin);
+			if(system(sysctlfortest)==0)
+			{
+				strcat(passdesktop,name[i]);
+				strcat(passdesktop,"=");
+			}
+			strcat(passdesktop,ch);
+			strcpy(informdesktop[i],passdesktop);
+			printf("line-4[%d]=%s\n\n", i, informdesktop[i]);
+            dbus_pkgadd_singal_send(*informdesktop);
+			strcpy(pass,informdesktop[i]);
+			strcat(pass,"\n");
+			int fdin = open("/etc/desktop_query.txt",O_RDWR|O_CREAT|O_APPEND,0666);
+			if(fdin<0)
+			{perror("open");}
+			if(system(sysctlfortest)==0)
+			write(fdin,pass,strlen(pass));
+			close(fdin);
+			i++; 
             printf("getResult-upgrade-OK\n");
         }       
     }
