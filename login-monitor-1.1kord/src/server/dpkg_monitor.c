@@ -65,10 +65,10 @@ int inotify_call(char *path)
 	 struct inotify_event *event;
 	 int i;
 	 /*if(argc < 2)
-	 {
-	  fprintf(stderr, "%s path\n", argv[0]);
-	  return -1;
-	 }*/
+	 *{
+	 * fprintf(stderr, "%s path\n", argv[0]);
+	 * return -1;
+	 *}*/
 	 fd = inotify_init();
 	 if( fd < 0 )
 	 {
@@ -94,23 +94,47 @@ int inotify_call(char *path)
 				 { 
 					 if(event_str[i] == event_str[8])
 					 {
+						 printf("%s-%s\n",event->name,event_str[i]); 
 						 char *detect = NULL;
 						 detect = strstr(event->name,".dpkg-new");
-						 if(detect != NULL)
+						 printf("detect=%s\n",detect);
+						 if(detect != NULL) 
 						 {
 							 char substring[1024] = {0};
 							 char *subdetect = NULL;
 							 memset(substring,0,1024);
 							 strncpy(substring,event->name, detect-event->name);
+							 printf("event->name = %s\n",event->name);
+							 printf("substring = %s\n",substring);
 							 subdetect = strstr(substring,".");
-							 if(subdetect == NULL)
+							 if(subdetect == NULL)//判断创建的是否为目录
 							 {
 								 char subpath[1024] = {0};
-								 memset(subpath,'\0',sizeof(subpath));
+								 char sysctl[256]={0};
+								 char fpoutput[1024]={0};
+								 memset(subpath,0,sizeof(subpath));
+								 memset(sysctl,0,256);
+								 memset(fpoutput,0,1024);
 								 strcpy(subpath,path);
 								 strcat(subpath,"/");
 								 strcat(subpath, substring);
-								 usleep(15);
+								 printf("%s",subpath);
+								 sprintf(sysctl,"ls %s | grep \\.desktop.dpkg-new$",subpath);
+								 FILE *fp = popen(sysctl,"r");	
+								 while(fgets(fpoutput,sizeof(fpoutput),fp))
+								 {
+									    printf("2\n");
+							     		char *ret =strstr(fpoutput,".desktop.dpkg-new");
+								    	if(ret !=NULL)
+								    	{
+						 			    	printf("fpoutput= %s",fpoutput);
+									    	strncpy(deskinform, fpoutput, ret-fpoutput);
+									    	printf("deskinform = %s\n",deskinform);
+									    }
+								        	memset(fpoutput,0,1024);
+								 }
+								 pclose(fp);
+								 usleep(1000);
 								 wd = inotify_add_watch(fd, subpath, IN_CREATE|IN_DELETE);
 								 if(wd < 0)
 								 {
@@ -120,24 +144,26 @@ int inotify_call(char *path)
 							 }
 						 }
 					 }
-					 if(event_str[i] == event_str[8])
+					 if(event_str[i] == event_str[8])//判断创建.desktop事件
 					 {
 						 char *ret=NULL;
 						 ret = strstr(event->name, ".desktop");
 						 if(ret !=NULL)
 						 {
 							 strncpy(deskinform,event->name, ret-event->name);
-							 dbus_pkgadd_singal_send(deskinform);
+							 printf("deskinform = %s\n",deskinform);
+							 //dbus_pkgadd_singal_send(deskinform);
 						 }
 					 }
-					 else if (event_str[i] == event_str[9])
+					 else if (event_str[i] == event_str[9])//判断删除事件
 					 {
 						 char *ret = NULL;
 						 ret = strstr(event->name, ".desktop");
 						 if(ret != NULL)
 						 {
 							 strncpy(deskinform,event->name, ret-event->name);
-							 dbus_pkgremove_singal_send(deskinform);
+							 printf("deskinform = %s\n",deskinform);
+							// dbus_pkgremove_singal_send(deskinform);
 						 }
 					 }     
 				 } 
