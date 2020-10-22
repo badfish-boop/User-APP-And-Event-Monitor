@@ -11,8 +11,7 @@
 #include <libgen.h>
 #include <dirent.h>
 #include <errno.h>
-
-
+#include "dbus_server.h"
 
 #define BUF_LEN (10 * (sizeof(struct inotify_event) + NAME_MAX + 1))
 #define EVENT_NUM 12
@@ -66,10 +65,10 @@ int inotify_call(char *path)
 	 struct inotify_event *event;
 	 int i;
 	 /*if(argc < 2)
-	 *{
-	 * fprintf(stderr, "%s path\n", argv[0]);
-	 * return -1;
-	 *}*/
+	 {
+	  fprintf(stderr, "%s path\n", argv[0]);
+	  return -1;
+	 }*/
 	 fd = inotify_init();
 	 if( fd < 0 )
 	 {
@@ -95,7 +94,6 @@ int inotify_call(char *path)
 				 { 
 					 if(event_str[i] == event_str[8])
 					 {
-						 printf("%s-%s\n",event->name,event_str[i]); 
 						 char *detect = NULL;
 						 detect = strstr(event->name,".dpkg-new");
 						 if(detect != NULL) 
@@ -146,7 +144,6 @@ int inotify_call(char *path)
 						 if(ret !=NULL)
 						 {
 							 strncpy(deskinform,event->name, ret-event->name);
-							
 							 dbus_pkgadd_singal_send(deskinform);
 						 }
 					 }
@@ -157,7 +154,6 @@ int inotify_call(char *path)
 						 if(ret != NULL)
 						 {
 							 strncpy(deskinform,event->name, ret-event->name);
-							 printf("deskinform = %s\n",deskinform);
 							 dbus_pkgremove_singal_send(deskinform);
 						 }
 					 }     
@@ -168,7 +164,29 @@ int inotify_call(char *path)
 		 }
 	 }
 }
-
+int create_dir(const char *sPathName)  
+{  
+      char DirName[256];  
+      strcpy(DirName, sPathName);  
+      int i,len = strlen(DirName);
+      for(i=1; i<len; i++)  
+      {  
+          if(DirName[i]=='/')  
+          {  
+              DirName[i] = 0; 
+              if(access(DirName, NULL)!=0)  
+              {  
+                  if(mkdir(DirName, 0755)==-1)  
+                  {   
+                      printf("mkdir   error\n");   
+                      return -1;   
+                  }  
+              }  
+              DirName[i] = '/';  
+          }  
+      }  
+      return 0;  
+} 
 int dpkg_monitor_thread() {
     printf("enter dpkg_monitor_thread...\n");
     inotify_call("/usr/share/applications");
