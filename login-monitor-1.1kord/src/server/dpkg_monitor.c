@@ -114,11 +114,11 @@ int inotify_call(char *path)
 								 strcpy(subpath,path);
 								 strcat(subpath,"/");
 								 strcat(subpath, substring);
-								 sprintf(sysctl,"ls %s | grep \\.desktop.dpkg-new$",subpath);
+								 sprintf(sysctl,"ls %s | grep .desktop",subpath);
 								 FILE *fp = popen(sysctl,"r");	
 								 while(fgets(fpoutput,sizeof(fpoutput),fp))
 								 {
-							     		char *ret =strstr(fpoutput,".desktop.dpkg-new");
+							     		char *ret =strstr(fpoutput,".desktop");
 								    	if(ret !=NULL)
 								    	{
 									    	strncpy(deskinform, fpoutput, ret-fpoutput);
