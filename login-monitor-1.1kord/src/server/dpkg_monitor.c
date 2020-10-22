@@ -11,7 +11,8 @@
 #include <libgen.h>
 #include <dirent.h>
 #include <errno.h>
-#include "dbus_server.h"
+
+
 
 #define BUF_LEN (10 * (sizeof(struct inotify_event) + NAME_MAX + 1))
 #define EVENT_NUM 12
@@ -97,15 +98,12 @@ int inotify_call(char *path)
 						 printf("%s-%s\n",event->name,event_str[i]); 
 						 char *detect = NULL;
 						 detect = strstr(event->name,".dpkg-new");
-						 printf("detect=%s\n",detect);
 						 if(detect != NULL) 
 						 {
 							 char substring[1024] = {0};
 							 char *subdetect = NULL;
 							 memset(substring,0,1024);
 							 strncpy(substring,event->name, detect-event->name);
-							 printf("event->name = %s\n",event->name);
-							 printf("substring = %s\n",substring);
 							 subdetect = strstr(substring,".");
 							 if(subdetect == NULL)//判断创建的是否为目录
 							 {
@@ -118,18 +116,15 @@ int inotify_call(char *path)
 								 strcpy(subpath,path);
 								 strcat(subpath,"/");
 								 strcat(subpath, substring);
-								 printf("%s",subpath);
 								 sprintf(sysctl,"ls %s | grep \\.desktop.dpkg-new$",subpath);
 								 FILE *fp = popen(sysctl,"r");	
 								 while(fgets(fpoutput,sizeof(fpoutput),fp))
 								 {
-									    printf("2\n");
 							     		char *ret =strstr(fpoutput,".desktop.dpkg-new");
 								    	if(ret !=NULL)
 								    	{
-						 			    	printf("fpoutput= %s",fpoutput);
 									    	strncpy(deskinform, fpoutput, ret-fpoutput);
-									    	printf("deskinform = %s\n",deskinform);
+									    	dbus_pkgadd_singal_send(deskinform);
 									    }
 								        	memset(fpoutput,0,1024);
 								 }
@@ -151,8 +146,8 @@ int inotify_call(char *path)
 						 if(ret !=NULL)
 						 {
 							 strncpy(deskinform,event->name, ret-event->name);
-							 printf("deskinform = %s\n",deskinform);
-							 //dbus_pkgadd_singal_send(deskinform);
+							
+							 dbus_pkgadd_singal_send(deskinform);
 						 }
 					 }
 					 else if (event_str[i] == event_str[9])//判断删除事件
@@ -163,7 +158,7 @@ int inotify_call(char *path)
 						 {
 							 strncpy(deskinform,event->name, ret-event->name);
 							 printf("deskinform = %s\n",deskinform);
-							// dbus_pkgremove_singal_send(deskinform);
+							 dbus_pkgremove_singal_send(deskinform);
 						 }
 					 }     
 				 } 
@@ -173,29 +168,7 @@ int inotify_call(char *path)
 		 }
 	 }
 }
-int create_dir(const char *sPathName)  
-{  
-      char DirName[256];  
-      strcpy(DirName, sPathName);  
-      int i,len = strlen(DirName);
-      for(i=1; i<len; i++)  
-      {  
-          if(DirName[i]=='/')  
-          {  
-              DirName[i] = 0; 
-              if(access(DirName, NULL)!=0)  
-              {  
-                  if(mkdir(DirName, 0755)==-1)  
-                  {   
-                      printf("mkdir   error\n");   
-                      return -1;   
-                  }  
-              }  
-              DirName[i] = '/';  
-          }  
-      }  
-      return 0;  
-} 
+
 int dpkg_monitor_thread() {
     printf("enter dpkg_monitor_thread...\n");
     inotify_call("/usr/share/applications");
