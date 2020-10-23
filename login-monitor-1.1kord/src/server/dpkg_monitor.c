@@ -124,7 +124,7 @@ int inotify_call(char *path)
 									    	strncpy(deskinform, fpoutput, ret-fpoutput);
 									    	dbus_pkgadd_singal_send(deskinform);
 									    }
-								        	memset(fpoutput,0,1024);
+								        	memset(deskinform,0,1024);
 								 }
 								 pclose(fp);
 								 usleep(1000);
@@ -145,6 +145,7 @@ int inotify_call(char *path)
 						 {
 							 strncpy(deskinform,event->name, ret-event->name);
 							 dbus_pkgadd_singal_send(deskinform);
+							 memset(deskinform,0,1024);
 						 }
 					 }
 					 else if (event_str[i] == event_str[9])//判断删除事件
@@ -155,6 +156,7 @@ int inotify_call(char *path)
 						 {
 							 strncpy(deskinform,event->name, ret-event->name);
 							 dbus_pkgremove_singal_send(deskinform);
+							 memset(deskinform,0,1024);
 						 }
 					 }     
 				 } 
