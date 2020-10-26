@@ -30,6 +30,11 @@ char *event_str[EVENT_NUM] =
  "IN_DELETE_SELF",
  "IN_MOVE_SELF"
 };
+void init_deskinform(char * deskinform,char * name,char * ret)
+{
+	 memset(deskinform,0,1024);
+	 strncpy(deskinform, name, ret-name);
+} 
 int read_file_list(int fd,char *basePath) //初始化监控一级已有子目录
 {
      DIR *dir;
@@ -121,10 +126,10 @@ int inotify_call(char *path)
 							     		char *ret =strstr(fpoutput,".desktop");
 								    	if(ret !=NULL)
 								    	{
-									    	strncpy(deskinform, fpoutput, ret-fpoutput);
+									    	init_deskinform(deskinform, fpoutput, ret);
 									    	dbus_pkgadd_singal_send(deskinform);
+											
 									    }
-								        	memset(deskinform,0,1024);
 								 }
 								 pclose(fp);
 								 usleep(1000);
@@ -143,9 +148,9 @@ int inotify_call(char *path)
 						 ret = strstr(event->name, ".desktop");
 						 if(ret !=NULL)
 						 {
-							 strncpy(deskinform,event->name, ret-event->name);
+							 init_deskinform(deskinform,event->name, ret);
 							 dbus_pkgadd_singal_send(deskinform);
-							 memset(deskinform,0,1024);
+							 
 						 }
 					 }
 					 else if (event_str[i] == event_str[9])//判断删除事件
@@ -154,9 +159,9 @@ int inotify_call(char *path)
 						 ret = strstr(event->name, ".desktop");
 						 if(ret != NULL)
 						 {
-							 strncpy(deskinform,event->name, ret-event->name);
+							 init_deskinform(deskinform,event->name, ret);
 							 dbus_pkgremove_singal_send(deskinform);
-							 memset(deskinform,0,1024);
+							 
 						 }
 					 }     
 				 } 
@@ -194,3 +199,5 @@ int dpkg_monitor_thread() {
     inotify_call("/usr/share/applications");
     return 0;
 }
+
+
