@@ -42,4 +42,6 @@ char * dbus_get_method_call(struct dbus_set_para dbus_para);
 
 uid_t dbus_get_login_self_uid(struct dbus_set_para dbus_para);
 
+char *dbus_get_tencent_id_method_call(struct dbus_set_para dbus_para, char *username);
+
 #endif

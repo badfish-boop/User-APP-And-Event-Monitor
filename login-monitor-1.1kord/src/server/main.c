@@ -14,7 +14,7 @@
 #include "dbus_server.h"
 #include "login_monitor.h"
 #include "dpkg_monitor.h"
-#include "systime_monitor.h"
+//#include "systime_monitor.h"
 #include "list.h"
 
 
@@ -56,7 +56,7 @@ int main(void)
 
     if ((fp = fopen(filename, "r")) == NULL)
     {
-		printf(_("cannot open %s"), filename);
+		printf(_("cannot open %s\n"), filename);
         goto out;
     }
     memset(&para,0,sizeof(para));
@@ -68,31 +68,31 @@ int main(void)
     ret=pthread_create(&id,NULL,(void *) wtmp_monitor_thread,&para);  //创建wtmp文件监控线程
     if(ret!=0)
     {
-        printf ("Create wtmp_monitor_thread error!/n");
+        printf ("Create wtmp_monitor_thread error!\n");
         goto out;
     }
 
     ret=pthread_create(&id,NULL,(void *) utmp_monitor_thread,infolist); //创建utmp文件监控线程
     if(ret!=0)
     {
-        printf ("Create utmp_monitor_thread error!/n");
+        printf ("Create utmp_monitor_thread error!\n");
         goto out;
     }
 
     ret=pthread_create(&id,NULL,(void *) dpkg_monitor_thread,NULL);  //创建dpkg事件监控线程
     if(ret!=0)
     {
-        printf ("Create dpkg_monitor_thread error!/n");
+        printf ("Create dpkg_monitor_thread error!\n");
         goto out;
     }
-
+/*
     ret=pthread_create(&id,NULL,(void *) systime_monitor_thread,NULL);  //创建系统时间修改事件监控线程
     if(ret!=0)
     {
-        printf ("Create systime_monitor_thread error!/n");
+        printf ("Create systime_monitor_thread error!\n");
         goto out;
     }
-
+*/
 	/* connect to the daemon bus */
 	conn = dbus_bus_get(DBUS_BUS_SYSTEM, &err);
 	if (!conn) {
@@ -115,7 +115,7 @@ int main(void)
     ret=pthread_create(&id,NULL,(void *) dbus_server_thread,conn);
     if(ret!=0)
     {
-        printf ("Create dbus_server_thread error!/n");
+        printf ("Create dbus_server_thread error!\n");
         goto out;
     }
 */

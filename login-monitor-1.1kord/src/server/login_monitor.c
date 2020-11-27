@@ -103,11 +103,33 @@ uid_t get_current_uid()
     return uid;
 }
 
+char *get_tencent_id(char * username)
+{
+    struct dbus_set_para dbus_para;
+    char *tencent_id="";
+
+    memset(&dbus_para,0,sizeof(struct dbus_set_para));
+
+    dbus_para.server_name = "cn.kylinos.SSOBackend";  
+    dbus_para.object_path = "/cn/kylinos/SSOBackend";                  
+    dbus_para.interface = "cn.kylinos.SSOBackend.accounts";
+    dbus_para.method = "GetMDMId";
+
+    tencent_id=dbus_get_tencent_id_method_call(dbus_para,username);
+
+    return tencent_id;
+}
+
 int get_list(linkList *my_list,char **login_user_name,int *user_num)
 {
+    int i=0;
+    if(my_list==NULL)
+    {
+        login_user_name[i]="no user login";
+        return -1;
+    }
     linknode *pnode = my_list->_phead;
     linknode* cur_pos;
-    int i=0;
     if(my_list->_phead==NULL)
     {
         login_user_name[i]="no user login";
@@ -147,6 +169,7 @@ void utmp_monitor(linkList *infolist)
     char *user_name = "";
     linknodeData *pdata=NULL;
     my_list=infolist;   //将链表指向本地全局变量
+    printf("my_list1=%p\n",my_list);
 
     if (pthread_mutex_lock(&mutex) != 0){     //线程上锁
         printf("lock error!\n");

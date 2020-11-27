@@ -62,12 +62,6 @@ DBusConnection *Reg_New_SystemBus()
 {
     DBusConnection *connection;
     DBusError error;
-    DBusMessage *msg;
-    DBusMessage *borrow_message;
-    DBusMessage *reply = NULL;
-    dbus_int32_t no = 5;
-    char error_name[40];
-    char error_msg[40];
 
     dbus_error_init(&error);
 
@@ -281,8 +275,6 @@ char *dbus_get_method_call(struct dbus_set_para dbus_para)
     DBusMessageIter args,subargs;
     DBusPendingCall* pending;
     DBusConnection *conn;
-    int users_num=0;
-    uid_t uid;
     char *dbus_get_interface = "org.freedesktop.login1.User";
     char *dbus_get_property = "State";
     char *state = "";
@@ -352,6 +344,75 @@ char *dbus_get_method_call(struct dbus_set_para dbus_para)
         }
     }
     return state;
+}
+
+char *dbus_get_tencent_id_method_call(struct dbus_set_para dbus_para, char *username)
+{
+    printf("enter dbus_get_tencent_id_method_call \n");
+    DBusMessage* msg;
+    DBusMessageIter args;
+    DBusPendingCall* pending;
+    DBusConnection *conn;
+
+    char *tencent_id = "";
+
+    conn=Reg_New_SystemBus();
+     
+    msg = dbus_message_new_method_call(dbus_para.server_name, // target for the method call
+                                       dbus_para.object_path, // object to call on
+                                       dbus_para.interface, // interface to call on
+                                       dbus_para.method); // method name
+    if (NULL == msg) {
+        fprintf(stderr, "Message Null\n");
+        exit(1);
+    }
+
+    // append arguments
+    dbus_message_iter_init_append(msg, &args);
+    if (!dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &username)) {
+        fprintf(stderr, "Out Of Memory!\n");
+        exit(1);
+    }
+    
+    // send message and get a handle for a reply
+    if (!dbus_connection_send_with_reply (conn, msg, &pending, -1)) { // -1 is default timeout
+        fprintf(stderr, "Out Of Memory!\n");
+        exit(1);
+    }
+    if (NULL == pending) {
+        fprintf(stderr, "Pending Call Null\n");
+        exit(1);
+    }
+    dbus_connection_flush(conn);
+     
+    // free message
+    dbus_message_unref(msg);
+
+
+    // block until we receive a reply
+    dbus_pending_call_block(pending);
+     
+    // get the reply message
+    msg = dbus_pending_call_steal_reply(pending);
+    if (NULL == msg) {
+        fprintf(stderr, "Reply Null\n");
+        exit(1);
+    }
+    // free the pending message handle
+    dbus_pending_call_unref(pending);
+
+    printf("enter dbus_list_users_method_call replay args\n");
+    // read the parameters
+    if (!dbus_message_iter_init(msg, &args))
+        fprintf(stderr, "Message has no arguments!\n");
+    
+    if (DBUS_TYPE_STRING == dbus_message_iter_get_arg_type(&args))
+    {
+        dbus_message_iter_get_basic(&args, &tencent_id);
+        printf("Get Method called obtain tencent_id is %s\n", tencent_id);
+    }
+    
+    return tencent_id;
 }
 
 void dbus_userlogin_singal_send(uid_t ruid)
@@ -641,12 +702,12 @@ DBusHandlerResult server_message_handler(DBusConnection *conn, DBusMessage *mess
 		uid_t uid = 0;
         struct passwd *pwd = NULL;
         char *username = "";
-        uid_t tencent_uid =10086;
+        char * tencent_uid ="this user don't have tencent uid";
         gid_t group = 0;
         char *home_dir = "";
         const char *msg;
-        int error_code = -1;
-
+        int error_code_1 = -1;
+        int error_code_2 = -2;
 
         if(!dbus_message_get_args(message,&err,DBUS_TYPE_UINT32,&msg,DBUS_TYPE_INVALID))  //判断传入参数是否合法
         {
@@ -667,12 +728,11 @@ DBusHandlerResult server_message_handler(DBusConnection *conn, DBusMessage *mess
 			goto fail;
 
         pwd = getpwuid (uid);
-        printf("pwd=%p\n",pwd);
         if (pwd == NULL)
         {
-            printf("cannot find name for user ID %d\n",uid);
+            printf("cannot find tencent_uid for user ID %d\n",uid);
             dbus_message_iter_init_append(reply, &args);
-            if (!dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &error_code)) {
+            if (!dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &error_code_1)) {
                 fprintf(stderr, "Out Of Memory!\n");
                 exit(1);
             }
@@ -680,6 +740,17 @@ DBusHandlerResult server_message_handler(DBusConnection *conn, DBusMessage *mess
         }
 
         username = pwd->pw_name;
+        tencent_uid=get_tencent_id(username);
+        if(!tencent_uid)
+        {
+            printf("cannot find tencent_uid for user ID %d\n",uid);
+            dbus_message_iter_init_append(reply, &args);
+            if (!dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &error_code_2)) {
+                fprintf(stderr, "Out Of Memory!\n");
+                exit(1);
+            }
+            goto send;
+        }
         group = pwd->pw_gid;
         home_dir = pwd->pw_dir;
 
@@ -689,7 +760,7 @@ DBusHandlerResult server_message_handler(DBusConnection *conn, DBusMessage *mess
             fprintf(stderr, "Out Of Memory!\n");
             exit(1);
         }
-        if (!dbus_message_iter_append_basic(&args, DBUS_TYPE_UINT32, &tencent_uid)) {
+        if (!dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &tencent_uid)) {
             fprintf(stderr, "Out Of Memory!\n");
             exit(1);
         }
@@ -702,6 +773,7 @@ DBusHandlerResult server_message_handler(DBusConnection *conn, DBusMessage *mess
             exit(1);
         }
         goto send;
+        
     }else if (dbus_message_is_method_call(message, "com.kylin.intel.edu.uregis.interface", "GetCurUser")) {
         
         uid_t uid = 0;

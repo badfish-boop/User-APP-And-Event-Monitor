@@ -69,5 +69,6 @@ void wtmp_monitor_thread(Para *para);
 void utmp_monitor(linkList *infolist);
 void utmp_monitor_thread(linkList *infolist);
 int get_user_info(char **login_user_name,int *user_num);
+char *get_tencent_id(char * username);
 
 #endif

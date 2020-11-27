@@ -13,9 +13,8 @@
 
 int systime_monitor_thread() 
 {
-        char *front_time ;
-        char *current_time ;
-        char str[2048];
+        char front_time[200];
+        char current_time[200];
         int fd = timerfd_create(CLOCK_REALTIME, 0);
         timerfd_settime(fd, TFD_TIMER_ABSTIME | TFD_TIMER_CANCEL_ON_SET,
                         &(struct itimerspec){ .it_value = { .tv_sec = INT_MAX } },
@@ -34,8 +33,8 @@ int systime_monitor_thread()
                                 printf("tv_cur：tv_usec; %ld\n", tv_cur.tv_usec);
                                 printf("tv_sec; %ld\n", tv.tv_sec);
                                 printf("tv_usec; %ld\n", tv.tv_usec);
-                                front_time=(char *)malloc(2048*sizeof(char));
-                                current_time=(char *)malloc(2048*sizeof(char));
+                                memset(front_time,0,200);
+                                memset(current_time,0,200);
                                 sprintf(current_time,"%ld.%ld",tv_cur.tv_sec,tv_cur.tv_usec);
                                 sprintf(front_time,"%ld.%ld",tv.tv_sec,tv.tv_usec);
                                 /*
@@ -45,9 +44,6 @@ int systime_monitor_thread()
                                 printf("front_time=%s,current_time=%s\n",front_time,current_time);
                                 
                                 dbus_systime_change_singal_send(front_time,current_time);
-                                
-                                free(front_time);
-                                free(current_time);
                                 
                         }
                         else{
