@@ -14,7 +14,7 @@
 #include "dbus_server.h"
 #include "login_monitor.h"
 #include "dpkg_monitor.h"
-//#include "systime_monitor.h"
+#include "systime_monitor.h"
 #include "list.h"
 
 
@@ -85,14 +85,14 @@ int main(void)
         printf ("Create dpkg_monitor_thread error!\n");
         goto out;
     }
-/*
+
     ret=pthread_create(&id,NULL,(void *) systime_monitor_thread,NULL);  //创建系统时间修改事件监控线程
     if(ret!=0)
     {
         printf ("Create systime_monitor_thread error!\n");
         goto out;
     }
-*/
+
 	/* connect to the daemon bus */
 	conn = dbus_bus_get(DBUS_BUS_SYSTEM, &err);
 	if (!conn) {
@@ -111,14 +111,7 @@ int main(void)
     }
 
     dbus_server_loop(conn);
-/*
-    ret=pthread_create(&id,NULL,(void *) dbus_server_thread,conn);
-    if(ret!=0)
-    {
-        printf ("Create dbus_server_thread error!\n");
-        goto out;
-    }
-*/
+
 
     pthread_mutex_destroy(&mutex);
 
