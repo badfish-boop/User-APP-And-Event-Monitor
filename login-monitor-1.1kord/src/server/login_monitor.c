@@ -32,7 +32,7 @@ extern pthread_mutex_t mutex;
 linkList *my_list=NULL;
 //struct user_login_info * prev,* current_pos,* current_query_a,* current_query_b;
 int32_t login_process_time[7]={0};
-//static int tty1_login, tty2_login, tty3_login, tty4_login, tty5_login, tty6_login, tty7_login, tty8_login, tty9_login;
+
 
 int write_log (FILE* pFile, const char *format, ...) {
 	va_list arg;
@@ -56,7 +56,6 @@ uid_t get_cur_uid()
     int user_num = 0;
     struct dbus_set_para dbus_para;
     struct dbus_list_users list_user[512];
-    // ={{0,"",""}};
     char *state = "active";
     int i=0;
 
@@ -64,7 +63,7 @@ uid_t get_cur_uid()
 
     //获取当前登录过的用户数量及用户列表
     user_num = dbus_list_users_method_call(list_user);
-    printf("user_num = %d \n",user_num);
+    // printf("user_num = %d \n",user_num);
 
     //设置Get方法调用dbus接口参数
     dbus_para.server_name = "org.freedesktop.login1";                    
@@ -75,12 +74,12 @@ uid_t get_cur_uid()
     for(;i<user_num;i++)
     {
         dbus_para.object_path = list_user[i].object_path;
-        printf("object_path=%s\n",dbus_para.object_path);
-        printf("uid=%d\n",list_user[i].uid);
-        printf("user_name=%s\n",list_user[i].user_name);
+        // printf("object_path=%s\n",dbus_para.object_path);
+        // printf("uid=%d\n",list_user[i].uid);
+        // printf("user_name=%s\n",list_user[i].user_name);
         if(!strcmp(state,dbus_get_method_call(dbus_para)))  //如果某用户state值为active，则该用户为当前使用屏幕用户
         {
-            printf("list_user[%d].uid=%d\n",i,list_user[i].uid);
+            // printf("list_user[%d].uid=%d\n",i,list_user[i].uid);
             break;
         }
         
@@ -174,7 +173,7 @@ void utmp_monitor(linkList *infolist)
     if (pthread_mutex_lock(&mutex) != 0){     //线程上锁
         printf("lock error!\n");
     }
-    printf("utmp lock\n");
+    //printf("utmp lock\n");
 
     setutent();        //移动到文件头
 
@@ -199,11 +198,11 @@ void utmp_monitor(linkList *infolist)
                         pnode = pnode->_next;
                         continue;
                     }
-                    printf("current_pos->login_user_name_monit=%s \n",pnode->user_login_info->login_user_name_monit);
-                    printf("p_utent->ut_user=%s\n",p_utent->ut_user);
+                    //printf("current_pos->login_user_name_monit=%s \n",pnode->user_login_info->login_user_name_monit);
+                    //printf("p_utent->ut_user=%s\n",p_utent->ut_user);
                     if(strncmp(pnode->user_login_info->login_user_name_monit,p_utent->ut_user,strlen(pnode->user_login_info->login_user_name_monit))==0)    //遍历utmp文件，判断用户是否已经登录
                     {
-                        printf("user %s has login \n",p_utent->ut_user);    
+                        //printf("user %s has login \n",p_utent->ut_user);    
                         login_status=1;          //该用户已登录
                         //break;
                     }
@@ -223,7 +222,7 @@ void utmp_monitor(linkList *infolist)
                     user_name = strdup(p_utent->ut_user);
                     pwd=getpwnam(user_name);
                     if(pwd == NULL){
-                        printf(" user login monitor failed ,because use name not can be use\n");
+                        //printf(" user login monitor failed ,because use name not can be use\n");
                         ruid = NO_UID;
                     }
                     free(user_name);
@@ -232,7 +231,7 @@ void utmp_monitor(linkList *infolist)
                     if (ruid == NO_UID )
                         printf ("cannot get real UID\n");
                     dbus_userlogin_singal_send(ruid);
-                    printf("------USER %s on %s login in %.20s,pid is %d ------\n",p_utent->ut_user,p_utent->ut_line,(ctime(&t) + 4),p_utent->ut_pid);
+                    //printf("------USER %s on %s login in %.20s,pid is %d ------\n",p_utent->ut_user,p_utent->ut_line,(ctime(&t) + 4),p_utent->ut_pid);
                     strcpy(pdata->login_user_name_monit,p_utent->ut_user);
                     strcpy(pdata->login_line,p_utent->ut_line);
                     pdata->login_status=true;
@@ -244,7 +243,7 @@ void utmp_monitor(linkList *infolist)
         }
     }
     pthread_mutex_unlock(&mutex);  //线程解锁
-    printf("utmp unlock\n"); 
+    //printf("utmp unlock\n"); 
     endutent();  /* closes the utmp file. */
 
 }
@@ -265,7 +264,7 @@ int wtmp_monitor(Para *para)
     if (pthread_mutex_lock(&mutex) != 0){
         printf("lock error!\n");
     }
-    printf("wtmp lock\n");
+    //printf("wtmp lock\n");
     FILE *fp=para->fp;
     infolist=para->infolist;
 
@@ -278,7 +277,7 @@ int wtmp_monitor(Para *para)
         size = fread(&p_wtent,sizeof(p_wtent),1,fp);
         if(size < 0)
         {
-            printf("file read err\n");
+            //printf("file read err\n");
             return -1;
         }
         t=p_wtent.ut_tv.tv_sec;
@@ -310,20 +309,20 @@ int wtmp_monitor(Para *para)
                         
                         if(p_wtent.ut_tv.tv_sec > cur_pos->user_login_info->uli_tv.tv_sec && cur_pos->user_login_info->login_status==1)  //如果该用户之前正在登录，且登出时间大于登录时间，则认为该用户登出
                         {
-                        //printf("current_pos->login_line=%s\n",current_pos->login_line);
-                        //printf("p_wtent.ut_line=%s\n",p_wtent.ut_line);
-                        //printf("p_wtent.ut_tv.tv_sec=%d\n",p_wtent.ut_tv.tv_sec);
-                        //printf("current_pos->uli_tv.tv_sec=%d\n",current_pos->uli_tv.tv_sec);
-                        ruid=cur_pos->user_login_info->login_user_uid;
-                        cur_pos->user_login_info->login_status=0;
-                        printf("------USER %s on %s logout in %.20s,pid is %d ------\n",cur_pos->user_login_info->login_user_name_monit,p_wtent.ut_line,(ctime(&t) + 4),p_wtent.ut_pid);
-                        //printf("ruid=%d\n",ruid);
-                        dbus_userlogout_singal_send(ruid);
-                        pre_pos->_next=cur_pos->_next;                  //在链表中删除该节点
-                        free(cur_pos);
-                        infolist->_count--;
-                        cur_pos=NULL;
-                        break;
+                            //printf("current_pos->login_line=%s\n",current_pos->login_line);
+                            //printf("p_wtent.ut_line=%s\n",p_wtent.ut_line);
+                            //printf("p_wtent.ut_tv.tv_sec=%d\n",p_wtent.ut_tv.tv_sec);
+                            //printf("current_pos->uli_tv.tv_sec=%d\n",current_pos->uli_tv.tv_sec);
+                            ruid=cur_pos->user_login_info->login_user_uid;
+                            cur_pos->user_login_info->login_status=0;
+                            printf("------USER %s on %s logout in %.20s,pid is %d ------\n",cur_pos->user_login_info->login_user_name_monit,p_wtent.ut_line,(ctime(&t) + 4),p_wtent.ut_pid);
+                            //printf("ruid=%d\n",ruid);
+                            dbus_userlogout_singal_send(ruid);
+                            pre_pos->_next=cur_pos->_next;                  //在链表中删除该节点
+                            free(cur_pos);
+                            infolist->_count--;
+                            cur_pos=NULL;
+                            break;
                         }      
                     }
                     pre_pos=pre_pos->_next;
@@ -335,7 +334,7 @@ int wtmp_monitor(Para *para)
         break;
     }
     pthread_mutex_unlock(&mutex);
-    printf(" wtmp unlock\n"); 
+    //printf(" wtmp unlock\n"); 
 
     return 0;
 }

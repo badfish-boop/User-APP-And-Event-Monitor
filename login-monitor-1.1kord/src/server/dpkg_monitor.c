@@ -185,7 +185,7 @@ int create_dir(const char *sPathName)
               {  
                   if(mkdir(DirName, 0755)==-1)  
                   {   
-                      printf("mkdir   error\n");   
+                    //   printf("mkdir   error\n");   
                       return -1;   
                   }  
               }  
@@ -195,7 +195,7 @@ int create_dir(const char *sPathName)
       return 0;  
 } 
 int dpkg_monitor_thread() {
-    printf("enter dpkg_monitor_thread...\n");
+    // printf("enter dpkg_monitor_thread...\n");
     inotify_call("/usr/share/applications");
     return 0;
 }

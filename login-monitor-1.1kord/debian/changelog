@@ -1,8 +1,27 @@
-login-monitor (1.1kord-11) v101; urgency=medium
+login-monitor (1.1kord-15) v101; urgency=medium
+
+  *摘除系统时间修改监控功能
+
+ -- zhangdongwei <zhangdongwei@kylinos.cn>  Wed, 28 Apr 2021 09:30:51 +0800
+
+login-monitor (1.1kord-14) v101; urgency=medium
+
+  *修改代码错误 
+
+ -- zhangdongwei <zhangdongwei@kylinos.cn>  Fri, 27 Nov 2020 15:48:42 +0800
+
+login-monitor (1.1kord-13) v101; urgency=medium
+
+  * 合并dpkg监控代码，改由inotify方案实现
+  * 增加腾讯uid参数
+
+ -- zhangdongwei <zhangdongwei@kylinos.cn>  Fri, 27 Nov 2020 14:28:10 +0800
+
+login-monitor (1.1kord-12) v101; urgency=medium
   
-   *统一应用安装卸载信号参数名称为appid
+   *修改系统时间获取函数
  
- -- zhangdongwei <zhangdongwei@kylinos.cn>  Wed, 30 Sep 2020 11:28:45 +0800
+ -- zhangdongwei <zhangdongwei@kylinos.cn>  Fri, 30 sep 2020 14:26:50 +0800
 
 login-monitor (1.1kord-10) v101; urgency=medium
 

@@ -17,7 +17,7 @@ int main ()
 
     int ret=0;
 
-     dbus_error_init(&err);//将错误对象连接到dbus
+    dbus_error_init(&err);//将错误对象连接到dbus
 
     /* connect to the daemon bus */
 	conn = dbus_bus_get(DBUS_BUS_SYSTEM, &err);

@@ -86,12 +86,12 @@ int main(void)
         goto out;
     }
 
-    ret=pthread_create(&id,NULL,(void *) systime_monitor_thread,NULL);  //创建系统时间修改事件监控线程
-    if(ret!=0)
-    {
-        printf ("Create systime_monitor_thread error!\n");
-        goto out;
-    }
+    // ret=pthread_create(&id,NULL,(void *) systime_monitor_thread,NULL);  //创建系统时间修改事件监控线程
+    // if(ret!=0)
+    // {
+    //     printf ("Create systime_monitor_thread error!\n");
+    //     goto out;
+    // }
 
 	/* connect to the daemon bus */
 	conn = dbus_bus_get(DBUS_BUS_SYSTEM, &err);

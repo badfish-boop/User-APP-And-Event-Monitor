@@ -449,7 +449,6 @@ void dbus_userlogin_singal_send(uid_t ruid)
     // free the message
     dbus_message_unref(msg);
 
-
 }
 
 void dbus_userlogout_singal_send(uid_t ruid)

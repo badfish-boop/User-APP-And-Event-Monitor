@@ -13,6 +13,6 @@ Homepage: <insert the upstream URL, if relevant>
 
 Package: login-monitor
 Architecture: amd64
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: kylin-sso-backend
 Description: <monitor user login or logout and notify >
  <insert long description, indented with spaces>
