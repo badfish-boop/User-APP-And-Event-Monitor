@@ -1,3 +1,9 @@
+login-monitor (1.1kord-16) v101; urgency=medium
+
+  *对于更新过程中的delete dpkg-tmp 不外发信号
+
+ -- yangwenxuan <yangwenxuan@kylinos.cn>  Tue, 9 Nov 2021 15:16:51 +0800
+
 login-monitor (1.1kord-15) v101; urgency=medium
 
   *摘除系统时间修改监控功能

@@ -96,7 +96,7 @@ int inotify_call(char *path)
 			 for(i=0; i<EVENT_NUM; i++)
 			 {
 				 if((event->mask >> i) & 1)
-				 { 
+				 {
 					 if(event_str[i] == event_str[8])
 					 {
 						 char *detect = NULL;
@@ -156,6 +156,13 @@ int inotify_call(char *path)
 					 else if (event_str[i] == event_str[9])//判断删除事件
 					 {
 						 char *ret = NULL;
+						 char *rettmp = NULL;
+						 rettmp = strstr(event->name, ".dpkg-tmp");
+						 if(rettmp)
+						 {
+							break;
+						 }
+						 
 						 ret = strstr(event->name, ".desktop");
 						 if(ret != NULL)
 						 {
@@ -166,11 +173,13 @@ int inotify_call(char *path)
 					 }     
 				 } 
 			 }
-		 nread = nread + sizeof(struct inotify_event) + event->len;
-		 len = len - sizeof(struct inotify_event) - event->len;
-		 }
-	 }
+
+			nread = nread + sizeof(struct inotify_event) + event->len;
+			len = len - sizeof(struct inotify_event) - event->len;
+		}
+	}
 }
+
 int create_dir(const char *sPathName)  
 {  
       char DirName[256];  
